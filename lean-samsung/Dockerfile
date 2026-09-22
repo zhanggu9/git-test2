@@ -1,0 +1,14 @@
+FROM quantconnect/lean:latest
+
+USER root
+
+COPY SamsungBuyAndHold.py /module/SamsungBuyAndHold.py
+COPY download_samsung_data.py /module/download_samsung_data.py
+COPY render_report.py /module/render_report.py
+COPY config.json /module/config.json
+COPY entrypoint.sh /module/entrypoint.sh
+
+RUN chmod +x /module/entrypoint.sh \
+    && mkdir -p /results
+
+ENTRYPOINT ["/module/entrypoint.sh"]

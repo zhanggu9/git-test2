@@ -1,0 +1,102 @@
+# investment-analysis
+
+> 주식 투자 기초 학습용 웹앱과 퀀트 실습 환경. FastAPI 백엔드 + 순수 JavaScript(ES 모듈) SPA로 구성되며, MongoDB(퀴즈)·Qdrant(문서 RAG)·Meilisearch(키워드 검색)·Ollama(로컬 LLM/임베딩)를 Docker Compose로 함께 실행한다. QuantConnect LEAN 백테스트(삼성전자·삼성전기·현대차)와 PostgreSQL 주가 데이터(pg-stock)는 별도 Compose 구성으로 분리되어 있다.
+
+이 저장소는 국비 교육 과정(투자분석 기초 → 퀀트 금융 지식 → 데이터 퀀트 모델링 → 로보 어드바이저·인디케이터 프로젝트)의 실습 플랫폼이다. 모든 분석·백테스트·세무 시뮬레이션 기능은 교육 목적이며 투자 권유나 실제 주문·신고 용도가 아니다.
+
+핵심 사실:
+- 서버 진입점은 `app/backend/main.py`(FastAPI 앱 `app`)이며, 실행은 `uvicorn app.backend.main:app --port 8000`.
+- 프론트엔드는 `app/frontend/`를 `/`에 정적 마운트한다. React·Vue·번들러 없음. 차트는 대부분 Canvas 2D 직접 구현, 일부 ApexCharts(CDN).
+- 프론트 라우팅은 `app/frontend/js/app.js`가 사이드바(`pages/partials/sidebar-nav.html`)의 `data-view` 값으로 `js/views/*.js`를 로드하는 방식.
+- 학습 문서는 `docs/*.md`이며 `scripts/sync_learning_menu.py`로 메뉴에 동기화하고, `scripts/upload_docs_to_qdrant.sh`(또는 compose 프로필 `tools`의 `docs-index`)로 Qdrant에 색인한다.
+- 퀴즈 원본은 `app/backend/quiz_seed.sql`(SQLite 형식)이고 서버 시작 시 MongoDB에 동기화된다.
+- 외부 키(`DART_API_KEY`, Lex, AWS)가 비어 있으면 해당 API만 503을 반환하고 나머지 기능은 정상 동작한다.
+- Ollama 없는 환경(AWS `docker-compose.prod.yml`)은 `RAG_EMBEDDING_PROVIDER=hash`로 폴백하며, ollama 색인과 hash 색인은 서로 호환되지 않는다.
+- OpenAPI 명세는 실행 후 `http://localhost:8000/docs`, 태그 설명은 `app/backend/openapi_docs.py`.
+- 학습 환경변수 예시는 `app/backend/.env.example`, Docker 포트·키는 루트 `.env`.
+
+## 시작하기
+
+- [readme.md](https://github.com/edumgt/investment-analysis/blob/main/readme.md): 과정 커리큘럼, 기술 스택, Docker/Python 실행 방법, 환경변수 표, LEAN 백테스트 실행법, 시험 방식, Git 명령 일람
+- [docker-compose.yml](https://github.com/edumgt/investment-analysis/blob/main/docker-compose.yml): 로컬 전체 스택(backend·mongo·qdrant·ollama·meilisearch). 프로필 `init`(퀴즈 적재), `ollama-init`(모델 다운로드), `tools`(docs-index)
+- [docker-compose.prod.yml](https://github.com/edumgt/investment-analysis/blob/main/docker-compose.prod.yml): AWS 운영 구성. Ollama 없이 해시 임베딩으로 동작
+- [docker-compose.example.yaml](https://github.com/edumgt/investment-analysis/blob/main/docker-compose.example.yaml): Compose 설정 예시
+- [Dockerfile](https://github.com/edumgt/investment-analysis/blob/main/Dockerfile): 백엔드 이미지 빌드
+- [requirements.txt](https://github.com/edumgt/investment-analysis/blob/main/requirements.txt): Python 의존성(fastapi, motor, pandas, yfinance, pykrx, scikit-learn, torch, diffusers, opencv 등)
+- [app/backend/.env.example](https://github.com/edumgt/investment-analysis/blob/main/app/backend/.env.example): 백엔드 환경변수 템플릿(MongoDB, Qdrant, RAG/Ollama, Lex, DART)
+
+## 백엔드 (FastAPI)
+
+- [app/backend/main.py](https://github.com/edumgt/investment-analysis/blob/main/app/backend/main.py): 앱 생성, 라우터 등록, 정적 파일 마운트. `/api/market`, `/api/macro`, `/api/industry`, `/api/dart`, `/api/home`, `/api/learn`, `/api/search`, `/api/health`, `/api/dl`, `/api/cv`, `/api/genai`, `/api/nlp` 등 다수 엔드포인트가 이 파일 안에 직접 정의됨
+- [app/backend/db.py](https://github.com/edumgt/investment-analysis/blob/main/app/backend/db.py): MongoDB(motor) 연결과 퀴즈 시드 동기화
+- [app/backend/openapi_docs.py](https://github.com/edumgt/investment-analysis/blob/main/app/backend/openapi_docs.py): OpenAPI 태그(시스템, DART·기업, 산업·시장, 퀀트, 머신러닝, 퀴즈, 세무, RAG, Amazon Lex, 파일)와 공통 오류 응답 정의
+- [app/backend/pattern_detection.py](https://github.com/edumgt/investment-analysis/blob/main/app/backend/pattern_detection.py): 차트 패턴(컵앤핸들 등) 탐지 로직
+- [app/backend/routers/quant.py](https://github.com/edumgt/investment-analysis/blob/main/app/backend/routers/quant.py): `/api/quant/*` 백테스트·포트폴리오·리스크·파이프라인
+- [app/backend/routers/lean.py](https://github.com/edumgt/investment-analysis/blob/main/app/backend/routers/lean.py): LEAN 백테스트 결과(`lean-results/`, `samsung-em-results/`, `hyundai-results/`) 조회
+- [app/backend/routers/ml.py](https://github.com/edumgt/investment-analysis/blob/main/app/backend/routers/ml.py): `/api/ml/*` 합성 데이터 기반 ML 실습(회귀, SVM, 랜덤포레스트, k-means, 교차검증 등)
+- [app/backend/routers/quiz.py](https://github.com/edumgt/investment-analysis/blob/main/app/backend/routers/quiz.py): `/api/quiz/*` 일차별 퀴즈 조회·저장·시드 초기화
+- [app/backend/routers/vocabulary_exam.py](https://github.com/edumgt/investment-analysis/blob/main/app/backend/routers/vocabulary_exam.py): `/api/vocabulary-exam/*` 단어장 30문제 시험
+- [app/backend/routers/rag.py](https://github.com/edumgt/investment-analysis/blob/main/app/backend/routers/rag.py): `/api/rag/*` Qdrant 유사도 검색과 Ollama 답변 생성
+- [app/backend/routers/tax.py](https://github.com/edumgt/investment-analysis/blob/main/app/backend/routers/tax.py): `/api/tax/*` 거래내역 업로드 → 세무·회계 시뮬레이션(교육용)
+- [app/backend/routers/lex.py](https://github.com/edumgt/investment-analysis/blob/main/app/backend/routers/lex.py): `/api/lex/*` Amazon Lex V2 AI 투자 도우미 챗봇
+- [app/backend/routers/llm_bench.py](https://github.com/edumgt/investment-analysis/blob/main/app/backend/routers/llm_bench.py): `/api/llm-bench/*` AWS LLM 서빙 방식 3종 비교
+- [app/backend/routers/auth.py](https://github.com/edumgt/investment-analysis/blob/main/app/backend/routers/auth.py): `/api/auth/*` 회원가입·로그인·활동 기록
+- [app/backend/quiz_seed.sql](https://github.com/edumgt/investment-analysis/blob/main/app/backend/quiz_seed.sql): 퀴즈 문항 원본(SQLite INSERT 형식)
+
+## 프론트엔드 (순수 JS SPA)
+
+- [app/frontend/index.html](https://github.com/edumgt/investment-analysis/blob/main/app/frontend/index.html): 단일 페이지 진입점(marked.js, Mermaid, ApexCharts, Font Awesome CDN)
+- [app/frontend/js/app.js](https://github.com/edumgt/investment-analysis/blob/main/app/frontend/js/app.js): 뷰 라우팅과 사이드바 내비게이션 처리
+- [app/frontend/js/api.js](https://github.com/edumgt/investment-analysis/blob/main/app/frontend/js/api.js): 백엔드 API 호출 래퍼
+- [app/frontend/js/auth.js](https://github.com/edumgt/investment-analysis/blob/main/app/frontend/js/auth.js): 로그인 상태 관리
+- [app/frontend/pages/partials/sidebar-nav.html](https://github.com/edumgt/investment-analysis/blob/main/app/frontend/pages/partials/sidebar-nav.html): 메뉴 정의(`data-view`). `scripts/build_sidebar_partial.py`로 생성
+- [app/frontend/js/views/](https://github.com/edumgt/investment-analysis/tree/main/app/frontend/js/views): 화면별 모듈. home, learn, quiz, vocabularyExam, worldMarkets, macroRealtime, industryAnalysis, companyFinancial, dartFinancialAnalysis, valuation, quant, backtest, risk, portfolioRegime, assetClasses, todayGainers, todaySobujang, taxAccounting, linearRegression, svm, randomForest, kmeans, crossValidation, lstm, cnnTimeseries, transformer, textClassify, sentiment, opencv, huggingface, globalCapitalMap, groupNetwork, investmentTree, serverResources, cloudAiResources 등
+- [app/frontend/js/utils/financialCharts.js](https://github.com/edumgt/investment-analysis/blob/main/app/frontend/js/utils/financialCharts.js): Canvas 2D 캔들·지표 차트 공통 그리기
+- [app/frontend/js/utils/chartDrawingOffcanvas.js](https://github.com/edumgt/investment-analysis/blob/main/app/frontend/js/utils/chartDrawingOffcanvas.js): 차트 위 추세선·지지/저항선 그리기 도구
+- [app/frontend/js/utils/localState.js](https://github.com/edumgt/investment-analysis/blob/main/app/frontend/js/utils/localState.js): localStorage 학습 진행 상태 저장(시험 제출용 데이터의 출처)
+- [app/frontend/js/data/learnDocs.js](https://github.com/edumgt/investment-analysis/blob/main/app/frontend/js/data/learnDocs.js): 학습 문서 메뉴 목록(`sync_learning_menu.py`가 갱신)
+- [app/src/](https://github.com/edumgt/investment-analysis/tree/main/app/src): 실습용 Python 모듈(Backtest, PortfolioOptimizer, RiskManager, OpenCVCPU)
+
+## 학습 문서 (docs/)
+
+- [docs/03.md](https://github.com/edumgt/investment-analysis/blob/main/docs/03.md): 주식 1
+- [docs/05.md](https://github.com/edumgt/investment-analysis/blob/main/docs/05.md): 주식 2
+- [docs/04.md](https://github.com/edumgt/investment-analysis/blob/main/docs/04.md): 주식 3
+- [docs/06.md](https://github.com/edumgt/investment-analysis/blob/main/docs/06.md): 주식 4
+- [docs/07.md](https://github.com/edumgt/investment-analysis/blob/main/docs/07.md): 주식 5
+- [docs/10-1.md](https://github.com/edumgt/investment-analysis/blob/main/docs/10-1.md): 법인과 회사 구조 이해하기 1: 시작하기 전에
+- [docs/10-2.md](https://github.com/edumgt/investment-analysis/blob/main/docs/10-2.md): 법인과 회사 구조 이해하기 2: 운영·자금·신용보증
+- [docs/10-3.md](https://github.com/edumgt/investment-analysis/blob/main/docs/10-3.md): 법인과 회사 구조 이해하기 3: 세무·회계의 기초
+- [docs/11.md](https://github.com/edumgt/investment-analysis/blob/main/docs/11.md): 거시경제와 주식시장 읽기
+- [docs/voca.md](https://github.com/edumgt/investment-analysis/blob/main/docs/voca.md): 주식 학습 단어장
+- [docs/voca-exam.md](https://github.com/edumgt/investment-analysis/blob/main/docs/voca-exam.md): 주식 기초 단어장 30문제 시험지
+
+## 퀀트 백테스트 (QuantConnect LEAN, 별도 Compose)
+
+- [lean-samsung/README.md](https://github.com/edumgt/investment-analysis/blob/main/lean-samsung/README.md): 삼성전자(005930.KS) 매수·보유. `docker compose -f docker-compose.lean.yml run --rm samsung-backtest` → `lean-results/`
+- [lean-samsung-electro-mechanics/README.md](https://github.com/edumgt/investment-analysis/blob/main/lean-samsung-electro-mechanics/README.md): 삼성전기(009150.KS) 매수·보유 → `samsung-em-results/`
+- [lean-hyundai/README.md](https://github.com/edumgt/investment-analysis/blob/main/lean-hyundai/README.md): 현대차(005380.KS) SMA20>SMA60 추세 신호 2026년 상반기 검증. `docker compose -f docker-compose.hd.yaml run --build --rm hyundai-backtest` → `hyundai-results/`
+- [docker-compose.lean.yml](https://github.com/edumgt/investment-analysis/blob/main/docker-compose.lean.yml): 삼성전자·삼성전기 백테스트 서비스 정의
+- [docker-compose.hd.yaml](https://github.com/edumgt/investment-analysis/blob/main/docker-compose.hd.yaml): 현대차 백테스트 서비스 정의
+
+## 데이터·스크립트
+
+- [pg-stock/README.md](https://github.com/edumgt/investment-analysis/blob/main/pg-stock/README.md): PostgreSQL 18.6 주가 데이터베이스. 공개 postgres 이미지 + 비공개 data-seed 이미지(`edumgt/pg-stock-data-seed`)로 named volume 초기화
+- [data/README_vkospi_dataset.md](https://github.com/edumgt/investment-analysis/blob/main/data/README_vkospi_dataset.md): VKOSPI·KOSPI·KOSPI200 일별 결합 데이터셋(2013-08 ~ 2026-09) 설명과 생성 스크립트
+- [scripts/init_quiz_mongodb.sh](https://github.com/edumgt/investment-analysis/blob/main/scripts/init_quiz_mongodb.sh): 퀴즈 시드를 MongoDB에 적재(`--replace`로 교체)
+- [scripts/upload_docs_to_qdrant.sh](https://github.com/edumgt/investment-analysis/blob/main/scripts/upload_docs_to_qdrant.sh): docs/*.md를 제목 단위 분할 후 슬라이딩 윈도우 청크로 Qdrant 색인
+- [scripts/index_docs_meilisearch.py](https://github.com/edumgt/investment-analysis/blob/main/scripts/index_docs_meilisearch.py): 상단 검색창용 Meilisearch 전체 문서 색인
+- [scripts/sync_learning_menu.py](https://github.com/edumgt/investment-analysis/blob/main/scripts/sync_learning_menu.py): docs 제목 변경을 학습 메뉴에 반영
+- [scripts/build_sidebar_partial.py](https://github.com/edumgt/investment-analysis/blob/main/scripts/build_sidebar_partial.py): 사이드바 partial HTML 생성
+- [scripts/samsung_cup_handle_ml_predict.py](https://github.com/edumgt/investment-analysis/blob/main/scripts/samsung_cup_handle_ml_predict.py): 삼성전자 컵앤핸들 패턴 ML 예측 실습
+- [scripts/crawl_financial_sources.sh](https://github.com/edumgt/investment-analysis/blob/main/scripts/crawl_financial_sources.sh): 금융 사이트·유튜브 자료 수집(financial_site_spider.py, crawl_youtube_videos.py)
+- [.github/workflows/deploy.yml](https://github.com/edumgt/investment-analysis/blob/main/.github/workflows/deploy.yml): main 푸시 시 GHCR 이미지 빌드 후 EC2 배포
+
+## Optional
+
+- [6-1-rst/](https://github.com/edumgt/investment-analysis/tree/main/6-1-rst): 수강생 제출물(localStorage 진행 데이터) 분석·리포트 생성 스크립트
+- [6-2-rst/](https://github.com/edumgt/investment-analysis/tree/main/6-2-rst): 퀴즈 결과·MongoDB 추출물 아카이브 분석 스크립트
+- [mongo-export-20260904/](https://github.com/edumgt/investment-analysis/tree/main/mongo-export-20260904): MongoDB 내보내기 스냅샷
+- [quiz_questions.json](https://github.com/edumgt/investment-analysis/blob/main/quiz_questions.json): 퀴즈 문항 JSON 사본
+- [NotebookLM 노트북](https://notebook.google.com/notebook/42560d11-3e03-4b66-890d-67d52d52ccca): 학습 문서를 업로드한 NotebookLM(`scripts/upload_docs_to_notebooklm.py`)
+- [실습 사이트](https://st.edumgt.co.kr/analysis.html): 과정 실습 진행용 배포 사이트
