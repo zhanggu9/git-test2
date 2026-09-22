@@ -184,7 +184,6 @@ img { max-width: 100%; }
   transition: background .3s;
 }
 
-.auth-badge {
   display: flex; align-items: center; gap: 6px;
   padding: 5px 12px;
   background: var(--primary);
@@ -193,52 +192,33 @@ img { max-width: 100%; }
   font-size: .74rem; font-weight: 700; color: #fff;
   flex-shrink: 0;
 }
-.auth-badge:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
-.auth-modal-backdrop { position: fixed; z-index: 2200; inset: 0; display: grid; place-items: center; padding: 16px; background: rgba(15,23,42,.58); backdrop-filter: blur(3px); }
-.auth-modal-backdrop[hidden] { display: none; }
-.auth-modal { position: relative; width: min(100%, 420px); padding: 28px; border-radius: 16px; background: #fff; box-shadow: 0 24px 70px rgba(15,23,42,.32); }
-.auth-modal h2 { margin: 0; color: #0f172a; font-size: 1.3rem; }.auth-modal h2 + p { margin: 8px 0 18px; color: #64748b; font-size: .85rem; line-height: 1.5; }
-.auth-modal-close { position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; color: #64748b; border-radius: 8px; }.auth-modal-close:hover { color: #0f172a; background: #f1f5f9; }
-.auth-tabs { display: flex; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; }.auth-tabs button { flex: 1; padding: 9px; color: #64748b; font-weight: 700; }.auth-tabs button.active { color: #0078d4; border-bottom: 2px solid #0078d4; }
-.auth-modal form { display: grid; gap: 12px; }.auth-modal label { display: grid; gap: 6px; color: #475569; font-size: .78rem; font-weight: 700; }.auth-modal input { padding: 10px 11px; border: 1px solid #cbd5e1; border-radius: 7px; font: inherit; }.auth-modal input:focus { outline: 2px solid #bfdbfe; border-color: #2563eb; }
-.auth-submit, .auth-logout { padding: 11px; color: #fff; border-radius: 7px; background: #0078d4; font-weight: 750; }.auth-submit:disabled { opacity: .6; }.auth-logout { width: 100%; margin-top: 16px; background: #475569; }.auth-error { min-height: 18px; margin: 0; color: #dc2626; font-size: .76rem; }.auth-modal h3 { margin: 22px 0 9px; color: #334155; font-size: .88rem; }.auth-modal small { color: #64748b; }.auth-activity { max-height: 220px; margin: 0; padding-left: 18px; overflow: auto; color: #475569; font-size: .78rem; line-height: 1.7; }
 
 /* ── Enterprise 안내 모달 ── */
-.enterprise-modal-overlay {
   position: fixed; inset: 0; z-index: 200;
   display: flex; align-items: center; justify-content: center;
   background: rgba(15, 23, 42, .45);
   padding: 16px;
 }
-.enterprise-modal-overlay[hidden] { display: none; }
-.enterprise-modal {
   position: relative; width: min(92vw, 1600px); height: 90vh;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   overflow: auto;
   background: #fff; border-radius: 18px; padding: clamp(32px, 5vw, 72px);
   text-align: center; box-shadow: 0 20px 50px rgba(15, 23, 42, .25);
 }
-.enterprise-modal-close {
   position: absolute; top: 20px; right: 20px;
   width: 44px; height: 44px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   color: var(--text-muted); background: var(--surface-soft); border: none;
 }
-.enterprise-modal-close:hover { background: var(--border); color: var(--text); }
-.enterprise-modal-icon {
   width: 78px; height: 78px; margin: 0 auto 24px;
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
   background: linear-gradient(135deg, #004578 0%, #0078d4 55%, #2b88d8 100%);
   color: #fff; font-size: 2rem;
   box-shadow: 0 4px 14px rgba(0, 120, 212, .35);
 }
-.enterprise-modal h3 { margin: 0 0 14px; font-size: clamp(1.4rem, 2.5vw, 2rem); font-weight: 800; color: #1a1a1a; }
-.enterprise-modal p { margin: 0 0 28px; font-size: clamp(1rem, 1.7vw, 1.25rem); color: var(--text-muted); line-height: 1.65; }
-.enterprise-modal-cta {
   padding: 14px 36px; border-radius: 10px; border: none;
   background: var(--primary); color: #fff; font-size: 1rem; font-weight: 700;
 }
-.enterprise-modal-cta:hover { background: var(--primary-dark); }
 
 /* ═══════════════════════════════════════════════════════
    LAYOUT SHELL
@@ -277,14 +257,6 @@ img { max-width: 100%; }
 }
 
 /* 우측 하단 AI 투자 도우미 */
-.floating-chatbot { position: fixed; right: 24px; bottom: 24px; z-index: 100; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
-.floating-chatbot-trigger { display: inline-flex; align-items: center; gap: 9px; min-width: 54px; height: 54px; padding: 0 18px; color: #fff; border-radius: 999px; background: linear-gradient(135deg, #0078d4, #005a9e); box-shadow: 0 8px 22px rgba(0, 91, 158, .32); font-size: .82rem; font-weight: 800; transition: transform .15s, box-shadow .15s; }
-.floating-chatbot-trigger i { font-size: 1.15rem; }.floating-chatbot-trigger:hover { transform: translateY(-2px); box-shadow: 0 11px 26px rgba(0, 91, 158, .38); }
-.floating-chatbot-panel { width: min(360px, calc(100vw - 32px)); padding: 13px; border: 1px solid #bfdbfe; border-radius: 14px; background: #fff; box-shadow: 0 14px 36px rgba(15, 23, 42, .2); }.floating-chatbot-panel[hidden] { display: none; }
-.floating-chatbot-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #123b68; font-size: .85rem; font-weight: 800; }.floating-chatbot-head span { display: inline-flex; align-items: center; gap: 7px; }.floating-chatbot-head span i { color: var(--primary); }.floating-chatbot-head button { display: grid; place-items: center; width: 28px; height: 28px; color: #64748b; border-radius: 50%; background: var(--surface-soft); }.floating-chatbot-head button:hover { color: var(--text); background: var(--border); }
-.floating-chatbot-messages { display:flex; flex-direction:column; gap:12px; min-height:75px; max-height:260px; margin:14px 0 16px; overflow-y:auto; }.floating-chatbot-welcome { margin:0; padding:10px; color:#64748b; border-radius:9px; background:var(--surface-soft); font-size:.75rem; line-height:1.5; }.floating-chatbot-message { margin:0; padding:9px 10px; border-radius:9px; font-size:.75rem; line-height:1.5; word-break:break-word; }.floating-chatbot-message.is-user { align-self:flex-end; margin-left:28px; color:#475569; border:1px solid #dbe4ee; background:#fff; }.floating-chatbot-message.is-enterprise { align-self:flex-start; margin-right:14px; color:#1e40af; background:#dbeafe; font-weight:750; }
-.floating-chatbot-form { display: flex; gap: 6px; }.floating-chatbot-form input { min-width: 0; flex: 1; height: 36px; padding: 0 10px; color: var(--text); border: 1px solid #bfdbfe; border-radius: 8px; background: #fff; font-size: .75rem; outline: none; }.floating-chatbot-form input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0, 120, 212, .12); }.floating-chatbot-form button { width: 36px; height: 36px; color: #fff; border-radius: 8px; background: var(--primary); font-size: .75rem; }.floating-chatbot-form button:hover { background: var(--primary-dark); }
-@media (max-width: 760px) { .floating-chatbot { right: 16px; bottom: 16px; }.floating-chatbot-trigger { width: 54px; padding: 0; justify-content: center; }.floating-chatbot-trigger span { display: none; } }
 
 /* single nav item */
 .nav-item {
