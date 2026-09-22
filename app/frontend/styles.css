@@ -44,6 +44,12 @@ html, body {
   color: var(--text);
   overflow-x: hidden;
   overflow-y: auto;
+}
+html {
+  scroll-padding-top: calc(var(--topbar-h) + 12px);
+}
+body {
+  padding-top: var(--topbar-h);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -231,7 +237,7 @@ img { max-width: 100%; }
 .layout {
   display: flex;
   min-height: calc(100vh - var(--topbar-h));
-  margin-top: var(--topbar-h);
+  margin-top: 0;
   padding-top: 0;
   overflow: visible;
 }
