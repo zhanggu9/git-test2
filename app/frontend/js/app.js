@@ -7,18 +7,6 @@ import { assetClassesView }   from './views/assetClasses.js';
 import { todayGainersView }   from './views/todayGainers.js';
 import { todaySobujangView }  from './views/todaySobujang.js';
 import { globalCapitalMapView } from './views/globalCapitalMap.js';
-import { crossValidationView } from './views/crossValidation.js';
-import { decisionBoundaryView } from './views/decisionBoundary.js';
-import { randomForestView }    from './views/randomForest.js';
-import { kmeansView }          from './views/kmeans.js';
-import { svmView }             from './views/svm.js';
-import { mlpView }             from './views/mlp.js';
-import { linearRegressionView } from './views/linearRegression.js';
-import { textClassifyView }    from './views/textClassify.js';
-import { opencvView }          from './views/opencv.js';
-import { cnnTimeseriesView }   from './views/cnnTimeseries.js';
-import { lstmView }            from './views/lstm.js';
-import { transformerView }     from './views/transformer.js';
 import { backtestView }        from './views/backtest.js';
 import { quantView }           from './views/quant.js';
 import { portfolioView }       from './views/portfolio.js';
@@ -28,7 +16,6 @@ import { portfolioRegimeView } from './views/portfolioRegime.js';
 import { portfolioSimulationView } from './views/portfolioSimulation.js';
 import { pipelineView }        from './views/pipeline.js';
 import { riskView }            from './views/risk.js';
-import { huggingfaceView }     from './views/huggingface.js';
 import { macroRealtimeView }    from './views/macroRealtime.js';
 import { kospiExcludedView }   from './views/kospiExcluded.js';
 import { macroSimulationView }  from './views/macroSimulation.js';
@@ -44,7 +31,6 @@ import { investmentTreeView }   from './views/investmentTree.js';
 import { quizHomeView, quizDayView } from './views/quiz.js';
 import { vocabularyExamView } from './views/vocabularyExam.js';
 import { ragChatView } from './views/ragChat.js';
-import { llmBenchView } from './views/llmBenchView.js';
 import { companyFinancialView } from './views/companyFinancial.js';
 // 학습 화면 오류 수정본을 기존 ES 모듈 캐시와 분리해 항상 새로 불러온다.
 import { learnView }            from './views/learn.js?v=35';
@@ -54,7 +40,6 @@ import { api }                 from './api.js';
 import { LEARN_DOCS }          from './data/learnDocs.js';
 import { restoreFormState, saveFormState } from './utils/localState.js';
 import { initChartDrawingOffcanvas } from './utils/chartDrawingOffcanvas.js';
-import { initAuth, recordUsage } from './auth.js';
 
 const app        = document.getElementById('app');
 const breadcrumb = document.getElementById('breadcrumb');
@@ -194,18 +179,6 @@ const routes = {
   'today-gainers':    { label: '금일 상승종목',              render: () => todayGainersView(app) },
   'today-sobujang':   { label: '금일 소부장 종목',           render: () => todaySobujangView(app) },
   'global-capital-map': { label: '세계 거대자금 지도',       render: () => globalCapitalMapView(app) },
-  'cross-validation':  { label: 'Cross Validation',       render: () => crossValidationView(app) },
-  'decision-boundary': { label: 'Decision Boundary',      render: () => decisionBoundaryView(app) },
-  'random-forest':     { label: 'Random Forest',          render: () => randomForestView(app) },
-  'kmeans':            { label: 'KMeans 클러스터링',       render: () => kmeansView(app) },
-  'svm':               { label: 'SVM 분류기',             render: () => svmView(app) },
-  'mlp':               { label: 'MLP 신경망',             render: () => mlpView(app) },
-  'linear-regression': { label: '선형 회귀',              render: () => linearRegressionView(app) },
-  'text-classify':     { label: '텍스트 분류 (TF-IDF)',   render: () => textClassifyView(app) },
-  'opencv':            { label: 'OpenCV 애니메이션',      render: () => opencvView(app) },
-  'cnn-timeseries':    { label: '1D CNN 시계열',          render: () => cnnTimeseriesView(app) },
-  'lstm':              { label: 'LSTM 예측기',            render: () => lstmView(app) },
-  'transformer':       { label: 'Transformer',            render: () => transformerView(app) },
   'backtest':          { label: '백테스트 엔진',          render: () => backtestView(app) },
   'quant-lean':        { label: 'Quant · LEAN 백테스트 리포트', render: () => quantView(app) },
   'portfolio':         { label: '포트폴리오 최적화',      render: () => portfolioView(app) },
@@ -215,7 +188,6 @@ const routes = {
   'portfolio-simulation':  { label: '포트폴리오 시뮬레이션', render: () => portfolioSimulationView(app) },
   'pipeline':          { label: '퀀트 파이프라인',        render: () => pipelineView(app) },
   'risk':              { label: '리스크 분석 (VaR)',       render: () => riskView(app) },
-  'huggingface':       { label: 'HuggingFace 이미지 생성', render: () => huggingfaceView(app) },
   'macro-realtime':    { label: '거시경제현황 1 (실시간)',    render: () => macroRealtimeView(app) },
   'macro-simulation':  { label: '거시경제현황 2 (시뮬레이션)', render: () => macroSimulationView(app) },
   'kospi-excluded':    { label: 'KOSPI 제외 지수 분석',       render: () => kospiExcludedView(app) },
@@ -234,7 +206,6 @@ const routes = {
   'quiz-home':           { label: '퀴즈 · 통합 모의고사',        render: () => quizHomeView(app, navigate) },
   'vocabulary-exam':     { label: '퀴즈 · 단어장 30문제 시험',   render: () => vocabularyExamView(app, navigate) },
   'rag-chat':            { label: '문서 검색 채팅',              render: () => ragChatView(app) },
-  'llm-bench':           { label: 'LLM 서빙 방식 비교(AWS)',     render: () => llmBenchView(app) },
   ...quizDayRoutes,
   ...learnRoutes,
 };
@@ -395,8 +366,7 @@ function navigate(view) {
   // 현재 화면이 속한 사이드바 섹션만 펼치고 나머지는 닫는다 (사용 중인 메뉴만 열림)
   const _practiceViews = ['macro-realtime','macro-simulation','kospi-excluded','industry-analysis',
     'dart-region-search','group-network','company-financial','financial-statement','valuation',
-    'risk','technical-chart','backtest','pipeline','cross-validation','random-forest',
-    'kmeans','svm','mlp','linear-regression','lstm','transformer','market-snapshot','financial-knowledge'];
+    'risk','technical-chart','backtest','pipeline','market-snapshot','financial-knowledge'];
   const _portfolioViews = ['portfolio', 'portfolio-combination', 'portfolio-guide', 'portfolio-simulation'];
   const _aiViews = ['dart-financial-analysis','dart-company-search','tax-accounting'];
   const activeSections = [];
@@ -412,7 +382,6 @@ function navigate(view) {
   if (view?.startsWith('quiz-') || view === 'vocabulary-exam') updateQuizSidebarLock();
 
   route.render();
-  recordUsage(view);
   // MongoDB를 사용하지 않는 화면의 사용자 입력은 화면별로 브라우저에 보관한다.
   // 렌더링 직후 실행해 각 뷰의 기본값 대신 마지막 입력값을 복원한다.
   requestAnimationFrame(() => restoreFormState(view, app));
@@ -553,7 +522,6 @@ checkHealth();
 initScreenCaptureAssistant();
 initGlobalSearch();
 initChartDrawingOffcanvas();
-initAuth().then(() => { if (currentView) recordUsage(currentView); });
 setInterval(checkHealth, 30000);
 refreshTopbarMarkets();
 setInterval(refreshTopbarMarkets, TOPBAR_REFRESH_MS);
