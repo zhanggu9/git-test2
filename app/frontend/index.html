@@ -14,19 +14,6 @@
   <!-- ── 모바일 오버레이 ── -->
   <div id="overlay" class="overlay" onclick="closeSidebar()"></div>
 
-  <!-- ── 엔터프라이즈 안내 모달 ── -->
-  <div id="enterprise-modal-overlay" class="enterprise-modal-overlay" hidden>
-    <div class="enterprise-modal" role="dialog" aria-modal="true" aria-labelledby="enterprise-modal-title">
-      <button type="button" class="enterprise-modal-close" aria-label="닫기" onclick="closeEnterpriseModal()">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-      <div class="enterprise-modal-icon"><i class="fa-solid fa-crown"></i></div>
-      <h3 id="enterprise-modal-title">엔터프라이즈 가입자 이용 메뉴입니다.</h3>
-      <p>회원가입/로그인은 엔터프라이즈 요금제 가입 고객에게 제공되는 기능입니다.</p>
-      <button type="button" class="enterprise-modal-cta" onclick="closeEnterpriseModal()">확인</button>
-    </div>
-  </div>
-
   <!-- ═══════════════════════════════════════════
        TOPBAR
   ═══════════════════════════════════════════ -->
@@ -88,9 +75,6 @@
       <span id="health-text" class="health-text">확인 중</span>
     </a>
 
-    <button type="button" id="auth-badge" class="auth-badge" aria-label="회원가입 또는 로그인">
-      <i class="fa-solid fa-user"></i><span>회원가입/로그인</span>
-    </button>
   </header>
 
   <!-- ═══════════════════════════════════════════
@@ -199,9 +183,6 @@
         </a>
         <a class="nav-item" data-view="rag-chat">
           <i class="fa-solid fa-comments"></i><span>RAG</span>
-        </a>
-        <a class="nav-item" data-view="llm-bench">
-          <i class="fa-solid fa-cloud-bolt"></i><span>LLM 서빙 비교(AWS)</span>
         </a>
 
       </nav>
