@@ -382,6 +382,13 @@ function navigate(view) {
   if (view?.startsWith('quiz-') || view === 'vocabulary-exam') updateQuizSidebarLock();
 
   route.render();
+
+  // 각 화면으로 이동할 때 이전 화면의 스크롤 위치가 남아 있으면
+  // 고정된 상단바 아래에서 새 화면의 첫 콘텐츠가 잘릴 수 있다.
+  // 새 화면은 항상 콘텐츠 영역의 최상단에서 시작한다.
+  const contentMain = document.querySelector('.content-main');
+  if (contentMain) contentMain.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+
   // MongoDB를 사용하지 않는 화면의 사용자 입력은 화면별로 브라우저에 보관한다.
   // 렌더링 직후 실행해 각 뷰의 기본값 대신 마지막 입력값을 복원한다.
   requestAnimationFrame(() => restoreFormState(view, app));
