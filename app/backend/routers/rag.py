@@ -15,7 +15,7 @@ router = APIRouter()
 
 _QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 _QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "investment_docs")
-_RAG_EMBEDDING_PROVIDER = os.getenv("RAG_EMBEDDING_PROVIDER", "ollama").lower()
+_RAG_EMBEDDING_PROVIDER = os.getenv("RAG_EMBEDDING_PROVIDER", "hash").lower()
 _RAG_EMBEDDING_URL = os.getenv("RAG_EMBEDDING_URL", "").rstrip("/")
 _RAG_EMBEDDING_MODEL = os.getenv("RAG_EMBEDDING_MODEL", "")
 # CPU 환경에서는 임베딩 모델의 첫 로딩이 30초를 넘을 수 있다.
