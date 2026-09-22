@@ -37,10 +37,10 @@ export function ragChatView(app) {
         <div class="rag-chat-controls">
           <label for="rag-provider">답변 생성</label>
           <select id="rag-provider" class="param-input" aria-label="답변 생성 모듈 선택">
-            <option value="openai_compatible" ${provider === 'openai_compatible' ? 'selected' : ''} ${externalAiAvailable ? '' : 'disabled'}>질문 맞춤 요약 · Ollama</option>
+            <option value="openai_compatible" ${provider === 'openai_compatible' ? 'selected' : ''} ${externalAiAvailable ? '' : 'disabled'}>질문 맞춤 요약 · 외부 AI</option>
             <option value="rag" ${provider === 'rag' ? 'selected' : ''}>원문 발췌</option>
           </select>
-          <small id="rag-provider-note">${externalAiAvailable ? 'Ollama에는 검색 원문만 전달해 답변을 생성합니다.' : 'Ollama 모델을 준비하면 로컬 답변 생성을 사용할 수 있습니다.'}</small>
+          <small id="rag-provider-note">${externalAiAvailable ? '검색 원문만 외부 AI에 전달해 답변을 생성합니다.' : '외부 AI API를 설정하면 질문 맞춤 요약을 사용할 수 있습니다.'}</small>
           <span id="rag-status" class="badge badge-gray">연결 확인 중</span>
         </div>
       </section>
@@ -98,10 +98,10 @@ export function ragChatView(app) {
         providerSelect.value = 'rag';
       }
       providerNote.textContent = externalAiAvailable
-        ? `Ollama가 ${data.embedding?.model || '임베딩 모델'}로 찾은 원문만 전달해 답변을 생성합니다.`
+        ? `외부 AI에 검색 원문만 전달해 답변을 생성합니다.`
         : data.embedding?.provider === 'hash'
-          ? '서버는 Ollama 없이 해시 기반 문서 검색만 사용합니다.'
-          : 'Ollama 모델을 준비하면 로컬 답변 생성을 사용할 수 있습니다.';
+          ? '외부 모델 없이 경량 해시 기반 문서 검색만 사용합니다.'
+          : '외부 AI API를 설정하면 질문 맞춤 요약을 사용할 수 있습니다.';
       if (data.qdrant?.collection_available) {
         status.className = 'badge badge-green';
         status.textContent = `문서 ${Number(data.qdrant.points_count || 0).toLocaleString()}개 청크 연결됨`;
