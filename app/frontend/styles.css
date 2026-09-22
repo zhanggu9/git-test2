@@ -225,9 +225,11 @@ img { max-width: 100%; }
 ═══════════════════════════════════════════════════════ */
 .layout {
   display: flex;
-  padding-top: var(--topbar-h);
-  height: 100vh;
+  height: calc(100vh - var(--topbar-h));
+  margin-top: var(--topbar-h);
+  padding-top: 0;
   overflow: hidden;
+  min-height: 0;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -336,20 +338,26 @@ img { max-width: 100%; }
    CONTENT AREA
 ═══════════════════════════════════════════════════════ */
 .content-wrap {
-  flex: 1;
+  flex: 1 1 auto;
   margin-left: var(--sidebar-w);
   width: calc(100% - var(--sidebar-w));
   min-width: 0;
-  display: flex; flex-direction: column;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   overflow: hidden;
   transition: margin-left .25s cubic-bezier(.4,0,.2,1), width .25s cubic-bezier(.4,0,.2,1);
   background: var(--bg);
 }
 .content-main {
-  flex: 1;
+  flex: 1 1 auto;
   min-height: 0;
+  min-width: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 28px 36px 48px;
   width: 100%;
 }
