@@ -116,35 +116,24 @@ app.add_middleware(
 
 
 try:
-    from .routers.ml import router as ml_router
     from .routers.quant import router as quant_router
     from .routers.lean import router as lean_router
     from .routers.quiz import router as quiz_router
     from .routers.vocabulary_exam import EXAM_OPEN_AT, router as vocabulary_exam_router
     from .routers.tax import router as tax_router
     from .routers.rag import router as rag_router
-    from .routers.lex import router as lex_router
-    from .routers.auth import router as auth_router
-    from .routers.llm_bench import router as llm_bench_router
     from . import pattern_detection
 except ImportError:  # Allows `uvicorn main:app` from app/backend.
-    from routers.ml import router as ml_router  # type: ignore
     from routers.quant import router as quant_router  # type: ignore
     from routers.lean import router as lean_router  # type: ignore
     from routers.quiz import router as quiz_router  # type: ignore
     from routers.vocabulary_exam import EXAM_OPEN_AT, router as vocabulary_exam_router  # type: ignore
     from routers.tax import router as tax_router  # type: ignore
     from routers.rag import router as rag_router  # type: ignore
-    from routers.lex import router as lex_router  # type: ignore
-    from routers.auth import router as auth_router  # type: ignore
-    from routers.llm_bench import router as llm_bench_router  # type: ignore
     import pattern_detection  # type: ignore
-app.include_router(ml_router)
 app.include_router(quant_router)
 app.include_router(lean_router)
 app.include_router(vocabulary_exam_router)
-app.include_router(lex_router)
-app.include_router(auth_router)
 # Routers registered below are also included before the schema is first requested;
 # the OpenAPI factory is installed at the bottom of this module.
 
@@ -294,36 +283,57 @@ def get_learn_doc(doc_id: str) -> dict[str, str]:
 
 @app.get("/api/search")
 def search_learning_documents(q: str = "", limit: int = 8) -> dict[str, object]:
-    """Meilisearch를 통해 학습 문서의 제목과 본문을 전체 검색한다."""
-    query = q.strip()
+    """Search shipped learning documents locally without an external search service."""
+    raw_query = q.strip()
+    query = raw_query.lower()
     if len(query) < 2:
-        return {"query": query, "hits": []}
-    base_url = os.getenv("MEILI_URL", "http://meilisearch:7700").rstrip("/")
-    master_key = os.getenv("MEILI_MASTER_KEY", "")
-    payload = json.dumps({
-        "q": query,
-        "limit": max(1, min(limit, 20)),
-        "attributesToRetrieve": ["doc_id", "title"],
-        "attributesToHighlight": ["content"],
-        "attributesToCrop": ["content:35"],
-        "cropMarker": "…",
-    }).encode("utf-8")
-    headers = {"Content-Type": "application/json"}
-    if master_key:
-        headers["Authorization"] = f"Bearer {master_key}"
-    request = urllib.request.Request(f"{base_url}/indexes/learning_documents/search", data=payload, headers=headers, method="POST")
-    try:
-        with urllib.request.urlopen(request, timeout=4) as response:
-            result = json.loads(response.read().decode("utf-8"))
-    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError) as exc:
-        raise HTTPException(status_code=503, detail="문서 검색 색인을 준비하고 있습니다. 잠시 후 다시 시도해 주세요.") from exc
-    hits = [{
-        "doc_id": item.get("doc_id", ""),
-        "title": item.get("title", ""),
-        "snippet": re.sub(r"<[^>]+>", "", item.get("_formatted", {}).get("content", "")),
-    } for item in result.get("hits", [])]
-    return {"query": query, "hits": hits, "estimated_total_hits": result.get("estimatedTotalHits", len(hits))}
+        return {"query": raw_query, "hits": []}
 
+    limit = max(1, min(int(limit), 20))
+    hits: list[dict[str, object]] = []
+
+    for doc_id, path in _learn_document_map().items():
+        try:
+            content = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+
+        lower_content = content.lower()
+        position = lower_content.find(query)
+        if position < 0:
+            continue
+
+        title = next(
+            (
+                line.removeprefix("# ").strip()
+                for line in content.splitlines()
+                if line.startswith("# ")
+            ),
+            doc_id,
+        )
+        title_match = query in title.lower()
+        count = lower_content.count(query)
+        score = count + (5 if title_match else 0)
+        left = max(0, position - 60)
+        right = min(len(content), position + 220)
+        snippet = " ".join(content[left:right].split())
+
+        hits.append({
+            "doc_id": doc_id,
+            "title": title,
+            "snippet": snippet,
+            "_score": score,
+        })
+
+    hits.sort(key=lambda item: (-int(item["_score"]), str(item["title"])))
+    for item in hits:
+        item.pop("_score", None)
+
+    return {
+        "query": raw_query,
+        "hits": hits[:limit],
+        "estimated_total_hits": len(hits),
+    }
 
 def _dart_api_key() -> str:
     key = os.getenv("DART_API_KEY") or os.getenv("OPENDART_API_KEY")
@@ -3992,7 +4002,6 @@ def dart_financial_analysis(req: DartFinancialAnalysisRequest) -> dict:
 
 app.include_router(tax_router)
 app.include_router(rag_router)
-app.include_router(llm_bench_router)
 install_openapi(app)
 
 # ─────────────────────────────────────────────────────────────────────────────
