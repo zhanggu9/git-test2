@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # docs/*.md 문서를 청크/벡터화하여 Qdrant 컬렉션에 업로드합니다.
-# Ollama 임베딩 모델을 사용하므로, 질의 API와 동일한 모델로 색인해야 합니다.
+# 기본은 외부 모델 없이 동작하는 hash 임베딩입니다. Ollama는 선택적으로 사용할 수 있습니다.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -13,7 +13,7 @@ CHUNK_OVERLAP="${CHUNK_OVERLAP:-200}"
 BATCH_SIZE="${BATCH_SIZE:-64}"
 RAG_EMBEDDING_URL="${RAG_EMBEDDING_URL:-http://localhost:11434/api/embed}"
 RAG_EMBEDDING_MODEL="${RAG_EMBEDDING_MODEL:-embeddinggemma}"
-RAG_EMBEDDING_PROVIDER="${RAG_EMBEDDING_PROVIDER:-ollama}"
+RAG_EMBEDDING_PROVIDER="${RAG_EMBEDDING_PROVIDER:-hash}"
 
 usage() {
   cat <<EOF
@@ -28,7 +28,7 @@ Usage: $(basename "$0")
   BATCH_SIZE          업로드 배치 크기(기본: 64)
   RAG_EMBEDDING_URL   Ollama /api/embed 주소 (기본: http://localhost:11434/api/embed)
   RAG_EMBEDDING_MODEL 문서와 질의에 공통으로 쓸 Ollama 임베딩 모델 (기본: embeddinggemma)
-  RAG_EMBEDDING_PROVIDER ollama(기본) 또는 hash. hash는 Ollama 없이 쓰는 호환 모드입니다.
+  RAG_EMBEDDING_PROVIDER hash(기본) 또는 ollama. hash는 Ollama 없이 동작합니다.
 EOF
 }
 
