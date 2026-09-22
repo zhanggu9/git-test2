@@ -1,6 +1,9 @@
 services:
   backend:
     image: ${BACKEND_IMAGE:-investment-analysis-backend:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "80:8000"
     env_file:
@@ -21,6 +24,17 @@ services:
       KRX_API_KEY: ${KRX_API_KEY:-}
     depends_on:
       - mongo
+      - qdrant
+
+  docs-index:
+    image: ${BACKEND_IMAGE:-investment-analysis-backend:latest}
+    command: ["bash", "/app/scripts/upload_docs_to_qdrant.sh"]
+    environment:
+      DOCS_DIR: /app/docs
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: investment_docs
+      RAG_EMBEDDING_PROVIDER: hash
+    depends_on:
       - qdrant
 
   mongo:
