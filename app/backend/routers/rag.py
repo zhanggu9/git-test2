@@ -418,4 +418,3 @@ def rag_status() -> dict[str, object]:
         "embedding": {"provider": "hash", "model": "hashing-384"},
         "embed_method": _embedding_method(),
     }
-}
