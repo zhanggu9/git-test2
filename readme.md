@@ -1,4 +1,4 @@
-# Qunat 관련 과정
+# Quant 관련 과정
 
 ## WSL, VSCode, Git, GitHub, Docker 기본 사용 
 
