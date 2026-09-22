@@ -6,14 +6,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:8000"
-    env_file:
-      - ./app/backend/.env
     environment:
       MONGODB_URL: mongodb://mongo:27017
       MONGODB_DB: investment_db
       QDRANT_URL: http://qdrant:6333
       QDRANT_COLLECTION: investment_docs
-      RAG_EMBEDDING_PROVIDER: hash
       RAG_LLM_BASE_URL: ${RAG_LLM_BASE_URL:-https://api.openai.com/v1}
       RAG_LLM_MODEL: ${RAG_LLM_MODEL:-}
       RAG_LLM_API_KEY: ${RAG_LLM_API_KEY:-}
@@ -22,6 +19,7 @@ services:
       KOSIS_API_KEY: ${KOSIS_API_KEY:-}
       BOK_API_KEY: ${BOK_API_KEY:-}
       KRX_API_KEY: ${KRX_API_KEY:-}
+    restart: unless-stopped
     depends_on:
       - mongo
       - qdrant
@@ -33,7 +31,6 @@ services:
       DOCS_DIR: /app/docs
       QDRANT_URL: http://qdrant:6333
       QDRANT_COLLECTION: investment_docs
-      RAG_EMBEDDING_PROVIDER: hash
     depends_on:
       - qdrant
 
