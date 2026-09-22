@@ -22,6 +22,7 @@ COPY docs/ ./docs/
 COPY image/ ./image/
 COPY hyundai-results/ ./hyundai-results/
 COPY lean-results/ ./lean-results/
+COPY samsung-em-results/ ./samsung-em-results/
 COPY scripts/upload_docs_to_qdrant.sh ./scripts/upload_docs_to_qdrant.sh
 COPY scripts/sync_learning_menu.py ./scripts/sync_learning_menu.py
 COPY scripts/build_sidebar_partial.py ./scripts/build_sidebar_partial.py
