@@ -15,3 +15,9 @@ node_modules/
 *.pem
 coverage/
 .pytest_cache/
+
+# Not copied into the runtime image
+/data/
+/lean-hyundai/
+/lean-samsung/
+/lean-samsung-electro-mechanics/
