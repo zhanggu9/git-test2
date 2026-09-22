@@ -50,11 +50,17 @@ if [[ ! -d "$DOCS_DIR" ]]; then
 fi
 
 echo "[STEP] Vector DB 연결/컬렉션 조회: $QDRANT_URL"
-if ! curl -fsS "$QDRANT_URL/collections" >/dev/null; then
-  echo "[ERROR] Qdrant 조회 실패: $QDRANT_URL/collections"
-  exit 1
-fi
-echo "[OK] Vector DB 조회 성공"
+for attempt in $(seq 1 30); do
+  if curl -fsS "$QDRANT_URL/collections" >/dev/null; then
+    echo "[OK] Vector DB 조회 성공"
+    break
+  fi
+  if [[ "$attempt" == "30" ]]; then
+    echo "[ERROR] Qdrant 준비 시간 초과: $QDRANT_URL/collections"
+    exit 1
+  fi
+  sleep 2
+done
 
 python3 - \
   "$DOCS_DIR" "$QDRANT_URL" "$QDRANT_COLLECTION" \
