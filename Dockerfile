@@ -10,9 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/pip \
-    grep -v '^torch$' requirements.txt > requirements.nogpu.txt \
-    && pip install --index-url https://download.pytorch.org/whl/cpu torch \
-    && pip install -r requirements.nogpu.txt
+    pip install -r requirements.txt
 
 COPY app/ ./app/
 RUN mkdir -p app/frontend/vendor \
